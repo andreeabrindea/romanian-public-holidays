@@ -29,8 +29,6 @@ func getResponseBody(year int) ([]byte, error) {
 		if err != nil {
 		}
 	}(responseBody.Body)
-	//myString := string(body[:])
-	//fmt.Println(myString)
 	return body, nil
 }
 
@@ -90,7 +88,6 @@ func addHolidaysToDB(holidays []time.Time, urlDB string) error {
 }
 
 func runCronJobs() {
-
 	response, err := getResponseBody(time.Now().Year())
 	if err != nil {
 		log.Println(err)

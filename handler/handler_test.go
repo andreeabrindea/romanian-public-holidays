@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 )
 
 func TestGetResponseBody(t *testing.T) {
-	_, err := getResponseBody(-4, "abc")
+	_, err := GetResponseBody(-4, "abc")
 	if err == nil {
 		t.Errorf("expected an error, but got: %v", err)
 	}
@@ -22,7 +22,7 @@ func TestGetResponseBody(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	got, err := getResponseBody(2024, ts.URL)
+	got, err := GetResponseBody(2024, ts.URL)
 	if err != nil && got == nil {
 		t.Errorf("unexpected error: %v", err)
 	}

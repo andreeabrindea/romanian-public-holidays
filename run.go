@@ -88,7 +88,7 @@ func addHolidaysToDB(holidays []time.Time, urlDB string) error {
 }
 
 func runCronJobs() {
-	response, err := getResponseBody(time.Now().Year())
+	response, err := getResponseBody(2024)
 	if err != nil {
 		log.Println(err)
 	}

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-co-op/gocron"
 	"github.com/jackc/pgx/v5"
 	"io"
 	"log"
@@ -13,12 +12,11 @@ import (
 	"time"
 )
 
-func getResponseBody(year int) ([]byte, error) {
+func getResponseBody(year int, url string) ([]byte, error) {
 	if year < 0 || year > 2049 {
 		return nil, errors.New("unsupported year")
 	}
-	apiKey := "6ff1c210e443df1122a57a52aa383388be119213"
-	url := fmt.Sprintf("https://calendarific.com/api/v2/holidays?api_key=%s&country=RO&year=%v", apiKey, year)
+
 	responseBody, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -87,28 +85,24 @@ func addHolidaysToDB(holidays []time.Time, urlDB string) error {
 	return nil
 }
 
-func runCronJobs() {
-	response, err := getResponseBody(2024)
+func main() {
+	year := 2024
+	apiKey := "6ff1c210e443df1122a57a52aa383388be119213"
+	url := fmt.Sprintf("https://calendarific.com/api/v2/holidays?api_key=%s&country=RO&year=%v", apiKey, year)
+
+	response, err := getResponseBody(year, url)
 	if err != nil {
 		log.Println(err)
-	}
-	holidays, err := ConvertTOJSONWithDate(response)
-
-	s := gocron.NewScheduler(time.UTC)
-
-	_, err = s.Every(1).Days().Do(func() {
-		err := addHolidaysToDB(holidays, "postgres://xvyctfje:5yGXTCPQKkKJe0rjuvsJtFOQF7BiOBJp@mouse.db.elephantsql.com/xvyctfje")
-		if err != nil {
-			log.Print(err)
-			return
-		}
-	})
-	if err != nil {
 		return
 	}
-	s.StartBlocking()
-}
-
-func main() {
-	runCronJobs()
+	holidays, err := ConvertTOJSONWithDate(response)
+	err = addHolidaysToDB(holidays, "postgres://xvyctfje:5yGXTCPQKkKJe0rjuvsJtFOQF7BiOBJp@mouse.db.elephantsql.com/xvyctfje")
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	if err != nil {
+		log.Print(err)
+		return
+	}
 }

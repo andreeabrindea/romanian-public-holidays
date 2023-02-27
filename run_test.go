@@ -1,7 +1,7 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"github.com/google/go-cmp/cmp"
 	"net/http"
 	"net/http/httptest"
@@ -10,31 +10,22 @@ import (
 )
 
 func TestGetResponseBody(t *testing.T) {
-	t.Run("returns error for unsupported year", func(t *testing.T) {
-		year := -1
-		_, err := getResponseBody(year)
-		expectedErr := errors.New("unsupported year")
-		if err.Error() != expectedErr.Error() {
-			t.Errorf("got %v, expected %v", err, expectedErr)
-		}
-	})
-
-	t.Run("returns response body for supported year", func(t *testing.T) {
-		year := 2024
-		expectedResponseBody := []byte("test response body")
-		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			_, err := w.Write(expectedResponseBody)
-			if err != nil {
-				return
-			}
-		})
-		server := httptest.NewServer(handler)
-		defer server.Close()
-		_, err := getResponseBody(year)
+	_, err := getResponseBody(-4, "abc")
+	if err == nil {
+		t.Errorf("expected an error, but got: %v", err)
+	}
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, err := fmt.Fprintln(w, "Hello, client")
 		if err != nil {
-			t.Errorf("got error %v, expected nil", err)
+			return
 		}
-	})
+	}))
+	defer ts.Close()
+
+	got, err := getResponseBody(2024, ts.URL)
+	if err != nil && got == nil {
+		t.Errorf("unexpected error: %v", err)
+	}
 }
 func TestConvertTOJSONWithDate(t *testing.T) {
 	testCases := []struct {

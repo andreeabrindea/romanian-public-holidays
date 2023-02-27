@@ -9,15 +9,19 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"time"
 )
 
-func getResponseBody(year int, url string) ([]byte, error) {
+func getResponseBody(year int, rawUrl string) ([]byte, error) {
 	if year < 0 || year > 2049 {
 		return nil, errors.New("unsupported year")
 	}
-
-	responseBody, err := http.Get(url)
+	_, err := url.ParseRequestURI(rawUrl)
+	if err != nil {
+		return nil, errors.New("invalid url")
+	}
+	responseBody, err := http.Get(rawUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -88,9 +92,9 @@ func addHolidaysToDB(holidays []time.Time, urlDB string) error {
 func main() {
 	year := 2024
 	apiKey := "6ff1c210e443df1122a57a52aa383388be119213"
-	url := fmt.Sprintf("https://calendarific.com/api/v2/holidays?api_key=%s&country=RO&year=%v", apiKey, year)
+	rawUrl := fmt.Sprintf("https://calendarific.com/api/v2/holidays?api_key=%s&country=RO&year=%v", apiKey, year)
 
-	response, err := getResponseBody(year, url)
+	response, err := getResponseBody(year, rawUrl)
 	if err != nil {
 		log.Println(err)
 		return

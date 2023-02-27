@@ -75,3 +75,11 @@ func TestConvertTOJSONWithDate(t *testing.T) {
 		})
 	}
 }
+func TestAddHolidaysToDB(t *testing.T) {
+	//dates can be added, as if it already exists in db, it will be overridden
+	dates := []time.Time{time.Date(time.Now().Year(), 12, 25, 0, 0, 0, 0, time.Local)}
+	err := AddHolidaysToDB(dates, "postgres://xvyctfje:5yGXTCPQKkKJe0rjuvsJtFOQF7BiOBJp@mouse.db.elephantsql.com/xvyctfje")
+	if err != nil {
+		t.Fatalf("Failed to add Christmas in db: %v", err)
+	}
+}
